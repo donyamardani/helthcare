@@ -1,0 +1,10 @@
+
+{
+  "HomePage": {
+    "welcome": "Welcome to CarePulse 👋",
+    "getStarted": "Enter your details to get started",
+    "admin": "Admin",
+    "copyright": "© {year} CarePulse"
+  },
+  "Common": { "loading": "Loading..." } 
+}

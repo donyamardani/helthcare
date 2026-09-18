@@ -1,0 +1,24 @@
+
+{
+  "HomePage": {
+    "welcome": "به کیرپالس خوش آمدید 👋",
+    "getStarted": "برای شروع، اطلاعات خود را وارد کنید",
+    "admin": "مدیر",
+    "copyright": "© {year} کیرپالس"
+  },
+  "Common": { "loading": "در حال بارگذاری..." },
+  "Status": { "scheduled": "زمان‌بندی‌شده", "pending": "در انتظار", "cancelled": "لغوشده" },
+  "PasskeyModal": {
+  "title": "تأیید دسترسی مدیر",
+  "description": "برای دسترسی به صفحه مدیریت، رمز عبور را وارد کنید.",
+  "invalidPasskey": "رمز عبور نامعتبر است. دوباره تلاش کنید.",
+  "submit": "ورود با رمز مدیر"
+},"AppointmentModal": {
+  "schedule": "زمان‌بندی",
+  "cancel": "لغو",
+  "scheduleTitle": "زمان‌بندی نوبت",
+  "cancelTitle": "لغو نوبت",
+  "scheduleDesc": "برای زمان‌بندی نوبت، اطلاعات زیر را تکمیل کنید",
+  "cancelDesc": "برای لغو نوبت، اطلاعات زیر را تکمیل کنید"
+}
+}

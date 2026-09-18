@@ -1,18 +1,10 @@
-declare type Gender = "Male" | "Female" | "Other";
-declare type Status = "pending" | "scheduled" | "cancelled";
+import { Models } from 'node-appwrite';
 
-declare interface CreateUserParams {
+export interface Patient extends Models.Document {
+  userId: string;
   name: string;
   email: string;
   phone: string;
-}
-
-declare interface User extends CreateUserParams {
-  $id: string;
-}
-
-declare interface RegisterUserParams extends CreateUserParams {
-  userId: string;
   birthDate: Date;
   gender: Gender;
   address: string;
@@ -32,19 +24,13 @@ declare interface RegisterUserParams extends CreateUserParams {
   privacyConsent: boolean;
 }
 
-declare type CreateAppointmentParams = {
-  userId: string;
-  patient: string;
-  primaryPhysician: string;
-  reason: string;
+export interface Appointment extends Models.Document {
+  patient: Patient;
   schedule: Date;
   status: Status;
-  note: string | undefined;
-};
-
-declare type UpdateAppointmentParams = {
-  appointmentId: string;
+  primaryPhysician: string;
+  reason: string;
+  note: string;
   userId: string;
-  appointment: Partial<Appointment>;
-  type: string;
-};
+  cancellationReason: string | null;
+}
