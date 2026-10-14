@@ -2,15 +2,16 @@
 
 import { ID, Query } from 'node-appwrite';
 import { revalidatePath } from 'next/cache';
+import { getTranslations } from 'next-intl/server';
 
-import { formatDateTime } from '../utils';
-import { parseStringify } from '../utils';
+import { formatDateTime, parseStringify } from '../utils';
+import { sendSMS } from './sms.actions'; // ← تابع لیمو اس‌ام‌اس که قبلاً ساختیم
+import { getUser } from './patient.actions'; // ← برای گرفتن شماره تلفن از روی userId
 import { Appointment } from '@/types/appwrite.types';
 import {
   APPOINTMENT_COLLECTION_ID,
   DATABASE_ID,
   databases,
-  messaging,
 } from '../appwrite.config';
 
 export const createAppointment = async (
@@ -25,7 +26,10 @@ export const createAppointment = async (
     );
 
     return parseStringify(newAppointment);
-  } catch (error) {}
+  } catch (error) {
+    console.error('خطا در ایجاد نوبت:', error); // ← دیگه خالی نیست
+    throw error;
+  }
 };
 
 export const getAppointment = async (appointmentId: string) => {
@@ -35,10 +39,10 @@ export const getAppointment = async (appointmentId: string) => {
       APPOINTMENT_COLLECTION_ID!,
       appointmentId
     );
-
     return parseStringify(appointment);
   } catch (error) {
-    console.error('An error ocurred while fetching appointment:', error);
+    console.error('خطا در دریافت نوبت:', error);
+    throw error;
   }
 };
 
@@ -50,36 +54,23 @@ export const getRecentAppointmentList = async () => {
       [Query.orderDesc('$createdAt')]
     );
 
-    const initialCounts = {
-      scheduledCount: 0,
-      pendingCount: 0,
-      cancelledCount: 0,
-    };
+    const initialCounts = { scheduledCount: 0, pendingCount: 0, cancelledCount: 0 };
 
-    const counts = (appointments.documents as Appointment[]).reduce(
-      (acc, appointment) => {
-        if (appointment.status === 'scheduled') {
-          acc.scheduledCount++;
-        } else if (appointment.status === 'pending') {
-          acc.pendingCount++;
-        } else if (appointment.status === 'cancelled') {
-          acc.cancelledCount++;
-        }
+    const counts = (appointments.documents as Appointment[]).reduce((acc, appointment) => {
+      if (appointment.status === 'scheduled') acc.scheduledCount++;
+      else if (appointment.status === 'pending') acc.pendingCount++;
+      else if (appointment.status === 'cancelled') acc.cancelledCount++;
+      return acc;
+    }, initialCounts);
 
-        return acc;
-      },
-      initialCounts
-    );
-
-    const data = {
+    return parseStringify({
       totalCount: appointments.total,
       ...counts,
       documents: appointments.documents,
-    };
-
-    return parseStringify(data);
+    });
   } catch (error) {
-    console.error('An error ocurred while fetching appointments:', error);
+    console.error('خطا در دریافت لیست نوبت‌ها:', error);
+    throw error;
   }
 };
 
@@ -88,7 +79,8 @@ export const updateAppointment = async ({
   userId,
   appointment,
   type,
-}: UpdateAppointmentParams) => {
+  locale = 'fa', // ← پارامتر جدید: زبان فعلی کاربر، برای ترجمه‌ی متن پیامک
+}: UpdateAppointmentParams & { locale?: string }) => {
   try {
     const updatedAppointment = await databases.updateDocument(
       DATABASE_ID!,
@@ -98,45 +90,29 @@ export const updateAppointment = async ({
     );
 
     if (!updatedAppointment) {
-      throw new Error('Appointment not found');
+      throw new Error('نوبت یافت نشد');
     }
 
-    const smsMessage = `
-      Hi, it's CarePulse.
-      ${
-        type === 'schedule'
-          ? `Your appointment has been scheduled for ${
-              formatDateTime(appointment.schedule!).dateTime
-            } with Dr. ${appointment.primaryPhysician}.`
-          : `We regret to inform you that your appointment for ${
-              formatDateTime(appointment.schedule!).dateTime
-            } has been cancelled for the following reason: ${
-              appointment.cancellationReason
-            }.`
-      }
-      `;
+    // ترجمه‌ی متن پیامک بر اساس زبان کاربر
+    const t = await getTranslations({ locale, namespace: 'SMS' });
+    const { dateTime } = formatDateTime(appointment.schedule!, locale === 'fa' ? 'fa-IR' : 'en-US');
 
-    await sendSMSNotification(userId, smsMessage);
+    const smsMessage =
+      type === 'schedule'
+        ? t('scheduled', { dateTime, doctor: appointment.primaryPhysician })
+        : t('cancelled', { dateTime, reason: appointment.cancellationReason ?? '' });
+
+    // شماره‌ی تلفن کاربر رو از Appwrite می‌گیریم (چون لیمو به شماره نیاز داره، نه userId)
+    const user = await getUser(userId);
+    if (user?.phone) {
+      await sendSMS(user.phone, smsMessage);
+    }
 
     revalidatePath(`/admin`);
 
     return parseStringify(updatedAppointment);
   } catch (error) {
-    console.error('An error ocurred while updating appointment:', error);
-  }
-};
-
-export const sendSMSNotification = async (userId: string, content: string) => {
-  try {
-    const message = await messaging.createSms(
-      ID.unique(),
-      content,
-      [],
-      [userId]
-    );
-
-    return parseStringify(message);
-  } catch (error) {
-    console.error('An error ocurred while sending SMS notification:', error);
+    console.error('خطا در به‌روزرسانی نوبت:', error);
+    throw error;
   }
 };

@@ -1,118 +1,100 @@
 import { z } from 'zod';
+import type { useTranslations } from 'next-intl';
 
-export const UserFormValidation = z.object({
-  name: z
-    .string()
-    .min(2, 'Name must be at least 2 characters')
-    .max(50, 'Name must be at most 50 characters'),
-  email: z.string().email('Invalid email address'),
-  phone: z
-    .string()
-    .refine((phone) => /^\+\d{10,15}$/.test(phone), 'Invalid phone number'),
-});
+type TFunction = ReturnType<typeof useTranslations>;
 
-export const PatientFormValidation = z.object({
-  name: z
-    .string()
-    .min(2, 'Name must be at least 2 characters')
-    .max(50, 'Name must be at most 50 characters'),
-  email: z.string().email('Invalid email address'),
-  phone: z
-    .string()
-    .refine((phone) => /^\+\d{10,15}$/.test(phone), 'Invalid phone number'),
-  birthDate: z.coerce.date(),
-  gender: z.enum(['male', 'female', 'other']),
-  address: z
-    .string()
-    .min(5, 'Address must be at least 5 characters')
-    .max(500, 'Address must be at most 500 characters'),
-  occupation: z
-    .string()
-    .min(2, 'Occupation must be at least 2 characters')
-    .max(500, 'Occupation must be at most 500 characters'),
-  emergencyContactName: z
-    .string()
-    .min(2, 'Contact name must be at least 2 characters')
-    .max(50, 'Contact name must be at most 50 characters'),
-  emergencyContactNumber: z
-    .string()
-    .refine(
-      (emergencyContactNumber) => /^\+\d{10,15}$/.test(emergencyContactNumber),
-      'Invalid phone number'
-    ),
-  primaryPhysician: z.string().min(2, 'Select at least one doctor'),
-  insuranceProvider: z
-    .string()
-    .min(2, 'Insurance name must be at least 2 characters')
-    .max(50, 'Insurance name must be at most 50 characters'),
-  insurancePolicyNumber: z
-    .string()
-    .min(2, 'Policy number must be at least 2 characters')
-    .max(50, 'Policy number must be at most 50 characters'),
-  allergies: z.string().optional(),
-  currentMedication: z.string().optional(),
-  familyMedicalHistory: z.string().optional(),
-  pastMedicalHistory: z.string().optional(),
-  identificationType: z.string().optional(),
-  identificationNumber: z.string().optional(),
-  identificationDocument: z.custom<File[]>().optional(),
-  treatmentConsent: z
-    .boolean()
-    .default(false)
-    .refine((value) => value === true, {
-      message: 'You must consent to treatment in order to proceed',
-    }),
-  disclosureConsent: z
-    .boolean()
-    .default(false)
-    .refine((value) => value === true, {
-      message: 'You must consent to disclosure in order to proceed',
-    }),
-  privacyConsent: z
-    .boolean()
-    .default(false)
-    .refine((value) => value === true, {
-      message: 'You must consent to privacy in order to proceed',
-    }),
-});
+export const getUserFormValidation = (t: TFunction) =>
+  z.object({
+    name: z
+      .string()
+      .min(2, t('nameMin'))
+      .max(50, t('nameMax')),
+    email: z.string().email(t('emailInvalid')),
+    phone: z
+      .string()
+      .refine((phone) => /^\+\d{10,15}$/.test(phone), t('phoneInvalid')),
+  });
 
-export const CreateAppointmentSchema = z.object({
-  primaryPhysician: z.string().min(2, 'Select at least one doctor'),
-  schedule: z.coerce.date(),
-  reason: z
-    .string()
-    .min(2, 'Reason must be at least 2 characters')
-    .max(500, 'Reason must be at most 500 characters'),
-  note: z.string().optional(),
-  cancellationReason: z.string().optional(),
-});
+export const getPatientFormValidation = (t: TFunction) =>
+  getUserFormValidation(t).extend({
+    birthDate: z.coerce.date(),
+    gender: z.enum(['male', 'female', 'other']),
+    address: z.string().min(5, t('addressMin')).max(500, t('addressMax')),
+    occupation: z.string().min(2, t('occupationMin')).max(500, t('occupationMax')),
+    emergencyContactName: z
+      .string()
+      .min(2, t('emergencyNameMin'))
+      .max(50, t('emergencyNameMax')),
+    emergencyContactNumber: z
+      .string()
+      .refine((v) => /^\+\d{10,15}$/.test(v), t('phoneInvalid')),
+    primaryPhysician: z.string().min(2, t('selectDoctor')),
+    insuranceProvider: z
+      .string()
+      .min(2, t('insuranceNameMin'))
+      .max(50, t('insuranceNameMax')),
+    insurancePolicyNumber: z
+      .string()
+      .min(2, t('policyNumberMin'))
+      .max(50, t('policyNumberMax')),
+    allergies: z.string().optional(),
+    currentMedication: z.string().optional(),
+    familyMedicalHistory: z.string().optional(),
+    pastMedicalHistory: z.string().optional(),
+    identificationType: z.string().optional(),
+    identificationNumber: z.string().optional(),
+    identificationDocument: z.custom<File[]>().optional(),
+    treatmentConsent: z
+      .boolean()
+      .default(false)
+      .refine((v) => v === true, { message: t('consentRequired') }),
+    disclosureConsent: z
+      .boolean()
+      .default(false)
+      .refine((v) => v === true, { message: t('consentRequired') }),
+    privacyConsent: z
+      .boolean()
+      .default(false)
+      .refine((v) => v === true, { message: t('consentRequired') }),
+  });
 
-export const ScheduleAppointmentSchema = z.object({
-  primaryPhysician: z.string().min(2, 'Select at least one doctor'),
-  schedule: z.coerce.date(),
-  reason: z.string().optional(),
-  note: z.string().optional(),
-  cancellationReason: z.string().optional(),
-});
+export const getCreateAppointmentSchema = (t: TFunction) =>
+  z.object({
+    primaryPhysician: z.string().min(2, t('selectDoctor')),
+    schedule: z.coerce.date(),
+    reason: z.string().min(2, t('reasonMin')).max(500, t('reasonMax')),
+    note: z.string().optional(),
+    cancellationReason: z.string().optional(),
+  });
 
-export const CancelAppointmentSchema = z.object({
-  primaryPhysician: z.string().min(2, 'Select at least one doctor'),
-  schedule: z.coerce.date(),
-  reason: z.string().optional(),
-  note: z.string().optional(),
-  cancellationReason: z
-    .string()
-    .min(2, 'Reason must be at least 2 characters')
-    .max(500, 'Reason must be at most 500 characters'),
-});
+export const getScheduleAppointmentSchema = (t: TFunction) =>
+  z.object({
+    primaryPhysician: z.string().min(2, t('selectDoctor')),
+    schedule: z.coerce.date(),
+    reason: z.string().optional(),
+    note: z.string().optional(),
+    cancellationReason: z.string().optional(),
+  });
 
-export function getAppointmentSchema(type: string) {
+export const getCancelAppointmentSchema = (t: TFunction) =>
+  z.object({
+    primaryPhysician: z.string().min(2, t('selectDoctor')),
+    schedule: z.coerce.date(),
+    reason: z.string().optional(),
+    note: z.string().optional(),
+    cancellationReason: z
+      .string()
+      .min(2, t('cancellationReasonMin'))
+      .max(500, t('cancellationReasonMax')),
+  });
+
+export function getAppointmentSchema(type: 'create' | 'cancel' | 'schedule', t: TFunction) {
   switch (type) {
     case 'create':
-      return CreateAppointmentSchema;
+      return getCreateAppointmentSchema(t);
     case 'cancel':
-      return CancelAppointmentSchema;
+      return getCancelAppointmentSchema(t);
     default:
-      return ScheduleAppointmentSchema;
+      return getScheduleAppointmentSchema(t);
   }
 }

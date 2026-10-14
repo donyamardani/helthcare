@@ -13,12 +13,39 @@
   "description": "برای دسترسی به صفحه مدیریت، رمز عبور را وارد کنید.",
   "invalidPasskey": "رمز عبور نامعتبر است. دوباره تلاش کنید.",
   "submit": "ورود با رمز مدیر"
-},"AppointmentModal": {
+  },
+  "AppointmentModal": {
   "schedule": "زمان‌بندی",
   "cancel": "لغو",
   "scheduleTitle": "زمان‌بندی نوبت",
   "cancelTitle": "لغو نوبت",
   "scheduleDesc": "برای زمان‌بندی نوبت، اطلاعات زیر را تکمیل کنید",
   "cancelDesc": "برای لغو نوبت، اطلاعات زیر را تکمیل کنید"
+  },
+"Validation": {
+  "nameMin": "نام باید حداقل ۲ حرف باشد",
+  "nameMax": "نام باید حداکثر ۵۰ حرف باشد",
+  "emailInvalid": "ایمیل معتبر نیست",
+  "phoneInvalid": "شماره تلفن معتبر نیست",
+  "addressMin": "آدرس باید حداقل ۵ حرف باشد",
+  "addressMax": "آدرس باید حداکثر ۵۰۰ حرف باشد",
+  "occupationMin": "شغل باید حداقل ۲ حرف باشد",
+  "occupationMax": "شغل باید حداکثر ۵۰۰ حرف باشد",
+  "emergencyNameMin": "نام تماس اضطراری باید حداقل ۲ حرف باشد",
+  "emergencyNameMax": "نام تماس اضطراری باید حداکثر ۵۰ حرف باشد",
+  "selectDoctor": "حداقل یک پزشک انتخاب کنید",
+  "insuranceNameMin": "نام بیمه باید حداقل ۲ حرف باشد",
+  "insuranceNameMax": "نام بیمه باید حداکثر ۵۰ حرف باشد",
+  "policyNumberMin": "شماره بیمه‌نامه باید حداقل ۲ کاراکتر باشد",
+  "policyNumberMax": "شماره بیمه‌نامه باید حداکثر ۵۰ کاراکتر باشد",
+  "consentRequired": "برای ادامه باید رضایت دهید",
+  "reasonMin": "دلیل باید حداقل ۲ حرف باشد",
+  "reasonMax": "دلیل باید حداکثر ۵۰۰ حرف باشد",
+  "cancellationReasonMin": "دلیل لغو باید حداقل ۲ حرف باشد",
+  "cancellationReasonMax": "دلیل لغو باید حداکثر ۵۰۰ حرف باشد"
+},
+"SMS": {
+  "scheduled": "سلام، این پیام از کیرپالس است. نوبت شما برای {dateTime} با دکتر {doctor} ثبت شد.",
+  "cancelled": "متأسفانه نوبت شما برای {dateTime} به دلیل زیر لغو شد: {reason}"
 }
 }

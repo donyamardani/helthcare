@@ -6,5 +6,9 @@
     "admin": "Admin",
     "copyright": "© {year} CarePulse"
   },
-  "Common": { "loading": "Loading..." } 
+  "Common": { "loading": "Loading..." },
+"SMS": {
+  "scheduled": "Hi, it's CarePulse. Your appointment has been scheduled for {dateTime} with Dr. {doctor}.",
+  "cancelled": "We regret to inform you that your appointment for {dateTime} has been cancelled for the following reason: {reason}"
+}
 }

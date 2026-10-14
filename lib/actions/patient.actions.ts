@@ -25,28 +25,27 @@ export const createUser = async (user: CreateUserParams) => {
       user.name
     );
 
-    console.log('New user created:', newUser);
-
-    return newUser;
+    return parseStringify(newUser);
   } catch (error: any) {
-    if (error && error?.code === 409) {
+    if (error?.code === 409) {
       const existingUser = await users.list([
         Query.equal('email', [user.email]),
       ]);
-
       return parseStringify(existingUser.users[0]);
     }
-    console.error('An error occurred while creating a new user:', error);
+
+    console.error('خطا در ساخت کاربر جدید:', error);
+    throw error; // ← این خط اضافه شد: خطا به PatientForm می‌رسه
   }
 };
 
 export const getUser = async (userId: string) => {
   try {
     const user = await users.get(userId);
-
     return parseStringify(user);
   } catch (error) {
-    console.error('An error occurred while fetching user:', error);
+    console.error('خطا در دریافت اطلاعات کاربر:', error);
+    throw error;
   }
 };
 
@@ -62,7 +61,6 @@ export const registerPatient = async ({
         identificationDocument?.get('blobFile') as Blob,
         identificationDocument?.get('fileName') as string
       );
-
       file = await storage.createFile(BUCKET_ID!, ID.unique(), inputFile);
     }
 
@@ -72,14 +70,17 @@ export const registerPatient = async ({
       ID.unique(),
       {
         identificationDocumentId: file?.$id || null,
-        identificationDocumentUrl: `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${file?.$id}/view?project=${PROJECT_ID}`,
+        identificationDocumentUrl: file
+          ? `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${file.$id}/view?project=${PROJECT_ID}`
+          : null,
         ...patient,
       }
     );
 
     return parseStringify(newPatient);
   } catch (error) {
-    console.error('An error occurred while registering patient:', error);
+    console.error('خطا در ثبت‌نام بیمار:', error);
+    throw error;
   }
 };
 
@@ -90,9 +91,9 @@ export const getPatient = async (userId: string) => {
       PATIENT_COLLECTION_ID!,
       [Query.equal('userId', userId)]
     );
-
     return parseStringify(patients.documents[0]);
   } catch (error) {
-    console.error('An error occurred while fetching patient:', error);
+    console.error('خطا در دریافت اطلاعات بیمار:', error);
+    throw error;
   }
 };

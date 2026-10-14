@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import DatePicker from 'react-datepicker';
-import { Controller, Control } from 'react-hook-form';
+import { Controller, Control ,FieldValues, FieldPath } from 'react-hook-form';
 import 'react-phone-number-input/style.css';
 import PhoneInput from 'react-phone-number-input';
 import { E164Number } from 'libphonenumber-js/core';
@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 
+
 export enum FormFieldType {
   INPUT = 'input',
   TEXTAREA = 'textarea',
@@ -22,10 +23,10 @@ export enum FormFieldType {
   SKELETON = 'skeleton',
 }
 
-interface CustomProps {
-  control: Control<any>;
+interface CustomProps<TFieldValues extends FieldValues = FieldValues> {
+  control: Control<TFieldValues>;
   fieldType: FormFieldType;
-  name: string;
+  name: FieldPath<TFieldValues>;
   label?: string;
   placeholder?: string;
   iconSrc?: string;
@@ -37,8 +38,13 @@ interface CustomProps {
   children?: React.ReactNode;
   renderSkeleton?: (field: any) => React.ReactNode;
 }
-
-const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
+const RenderField = <TFieldValues extends FieldValues = FieldValues>({
+  field,
+  props,
+}: {
+  field: any;
+  props: CustomProps<TFieldValues>;
+}) => {
   const {
     fieldType,
     iconSrc,
@@ -48,7 +54,6 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
     dateFormat,
     renderSkeleton,
   } = props;
-
   switch (fieldType) {
     case FormFieldType.INPUT:
       return (
@@ -143,7 +148,10 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
   }
 };
 
-const CustomFormField = (props: CustomProps) => {
+
+const CustomFormField = <TFieldValues extends FieldValues = FieldValues>(
+  props: CustomProps<TFieldValues>
+) => {
   const { control, fieldType, name, label } = props;
 
   return (
@@ -156,7 +164,7 @@ const CustomFormField = (props: CustomProps) => {
             <FieldLabel htmlFor={name}>{label}</FieldLabel>
           )}
 
-          <RenderField field={field} props={props} />
+          <RenderField<TFieldValues> field={field} props={props} />
 
           {fieldState.error && (
             <FieldError className="shad-error">
@@ -168,5 +176,4 @@ const CustomFormField = (props: CustomProps) => {
     />
   );
 };
-
 export default CustomFormField;
