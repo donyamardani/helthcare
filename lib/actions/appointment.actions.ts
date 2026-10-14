@@ -1,18 +1,20 @@
-'use server';
+ 'use server';
 
 import { ID, Query } from 'node-appwrite';
 import { revalidatePath } from 'next/cache';
 import { getTranslations } from 'next-intl/server';
 
 import { formatDateTime, parseStringify } from '../utils';
-import { sendSMS } from './sms.actions'; // ← تابع لیمو اس‌ام‌اس که قبلاً ساختیم
-import { getUser } from './patient.actions'; // ← برای گرفتن شماره تلفن از روی userId
-import { Appointment } from '@/types/appwrite.types';
+import { sendSMS } from './sms.actions';
+import { getUser } from './patient.actions';
+import type { Appointment } from '@/types/appwrite.types';
 import {
   APPOINTMENT_COLLECTION_ID,
   DATABASE_ID,
   databases,
 } from '../appwrite.config';
+
+type SupportedLocale = 'fa' | 'en';
 
 export const createAppointment = async (
   appointment: CreateAppointmentParams
@@ -27,7 +29,7 @@ export const createAppointment = async (
 
     return parseStringify(newAppointment);
   } catch (error) {
-    console.error('خطا در ایجاد نوبت:', error); // ← دیگه خالی نیست
+    console.error('Error creating appointment:', error);
     throw error;
   }
 };
@@ -39,9 +41,10 @@ export const getAppointment = async (appointmentId: string) => {
       APPOINTMENT_COLLECTION_ID!,
       appointmentId
     );
+
     return parseStringify(appointment);
   } catch (error) {
-    console.error('خطا در دریافت نوبت:', error);
+    console.error('Error fetching appointment:', error);
     throw error;
   }
 };
@@ -54,14 +57,27 @@ export const getRecentAppointmentList = async () => {
       [Query.orderDesc('$createdAt')]
     );
 
-    const initialCounts = { scheduledCount: 0, pendingCount: 0, cancelledCount: 0 };
+    const initialCounts = {
+      scheduledCount: 0,
+      pendingCount: 0,
+      cancelledCount: 0,
+    };
+const counts = appointments.documents.reduce(
+  (acc, document) => {
+    const status = document.status;
 
-    const counts = (appointments.documents as Appointment[]).reduce((acc, appointment) => {
-      if (appointment.status === 'scheduled') acc.scheduledCount++;
-      else if (appointment.status === 'pending') acc.pendingCount++;
-      else if (appointment.status === 'cancelled') acc.cancelledCount++;
-      return acc;
-    }, initialCounts);
+    if (status === 'scheduled') {
+      acc.scheduledCount++;
+    } else if (status === 'pending') {
+      acc.pendingCount++;
+    } else if (status === 'cancelled') {
+      acc.cancelledCount++;
+    }
+
+    return acc;
+  },
+  initialCounts
+);
 
     return parseStringify({
       totalCount: appointments.total,
@@ -69,7 +85,7 @@ export const getRecentAppointmentList = async () => {
       documents: appointments.documents,
     });
   } catch (error) {
-    console.error('خطا در دریافت لیست نوبت‌ها:', error);
+    console.error('Error fetching recent appointments:', error);
     throw error;
   }
 };
@@ -79,8 +95,8 @@ export const updateAppointment = async ({
   userId,
   appointment,
   type,
-  locale = 'fa', // ← پارامتر جدید: زبان فعلی کاربر، برای ترجمه‌ی متن پیامک
-}: UpdateAppointmentParams & { locale?: string }) => {
+  locale = 'fa',
+}: UpdateAppointmentParams & { locale?: SupportedLocale }) => {
   try {
     const updatedAppointment = await databases.updateDocument(
       DATABASE_ID!,
@@ -89,30 +105,63 @@ export const updateAppointment = async ({
       appointment
     );
 
-    if (!updatedAppointment) {
-      throw new Error('نوبت یافت نشد');
+    const normalizedLocale: SupportedLocale =
+      locale === 'en' ? 'en' : 'fa';
+
+    // Send the SMS in the selected language.
+    try {
+      const t = await getTranslations({
+        locale: normalizedLocale,
+        namespace: 'SMS',
+      });
+
+      const scheduleValue = appointment.schedule;
+
+      if (scheduleValue) {
+        const { dateTime } = formatDateTime(
+          scheduleValue,
+          normalizedLocale === 'fa' ? 'fa-IR' : 'en-US'
+        );
+
+        const smsMessage =
+          type === 'schedule'
+            ? t('scheduled', {
+                dateTime,
+                doctor: appointment.primaryPhysician,
+              })
+            : t('cancelled', {
+                dateTime,
+                reason: appointment.cancellationReason ?? '',
+              });
+
+        const user = await getUser(userId);
+
+        if (user?.phone) {
+          await sendSMS(user.phone, smsMessage);
+        } else {
+          console.warn(
+            'Appointment updated, but no patient phone number was found.'
+          );
+        }
+      } else {
+        console.warn(
+          'Appointment updated, but no schedule date was provided for the SMS.'
+        );
+      }
+    } catch (smsError) {
+      // The appointment has already been updated.
+      // An SMS failure should not report the database update as failed.
+      console.error(
+        'Appointment updated, but sending the SMS failed:',
+        smsError
+      );
     }
 
-    // ترجمه‌ی متن پیامک بر اساس زبان کاربر
-    const t = await getTranslations({ locale, namespace: 'SMS' });
-    const { dateTime } = formatDateTime(appointment.schedule!, locale === 'fa' ? 'fa-IR' : 'en-US');
-
-    const smsMessage =
-      type === 'schedule'
-        ? t('scheduled', { dateTime, doctor: appointment.primaryPhysician })
-        : t('cancelled', { dateTime, reason: appointment.cancellationReason ?? '' });
-
-    // شماره‌ی تلفن کاربر رو از Appwrite می‌گیریم (چون لیمو به شماره نیاز داره، نه userId)
-    const user = await getUser(userId);
-    if (user?.phone) {
-      await sendSMS(user.phone, smsMessage);
-    }
-
-    revalidatePath(`/admin`);
+    revalidatePath('/admin');
 
     return parseStringify(updatedAppointment);
   } catch (error) {
-    console.error('خطا در به‌روزرسانی نوبت:', error);
+    console.error('Error updating appointment:', error);
     throw error;
   }
 };

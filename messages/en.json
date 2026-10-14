@@ -1,14 +1,69 @@
-
 {
   "HomePage": {
     "welcome": "Welcome to CarePulse 👋",
-    "getStarted": "Enter your details to get started",
+    "getStarted": "Enter your information to get started",
     "admin": "Admin",
     "copyright": "© {year} CarePulse"
   },
-  "Common": { "loading": "Loading..." },
-"SMS": {
-  "scheduled": "Hi, it's CarePulse. Your appointment has been scheduled for {dateTime} with Dr. {doctor}.",
-  "cancelled": "We regret to inform you that your appointment for {dateTime} has been cancelled for the following reason: {reason}"
-}
+  "Common": {
+    "loading": "Loading..."
+  },
+  "Status": {
+    "scheduled": "Scheduled",
+    "pending": "Pending",
+    "cancelled": "Cancelled"
+  },
+  "PasskeyModal": {
+    "title": "Admin Access Verification",
+    "description": "Enter the passkey to access the admin page.",
+    "invalidPasskey": "Invalid passkey. Please try again.",
+    "submit": "Sign in with Admin Passkey"
+  },
+  "AppointmentModal": {
+    "schedule": "Schedule",
+    "cancel": "Cancel",
+    "scheduleTitle": "Schedule Appointment",
+    "cancelTitle": "Cancel Appointment",
+    "scheduleDesc": "Complete the following information to schedule the appointment.",
+    "cancelDesc": "Complete the following information to cancel the appointment."
+  },
+  "Validation": {
+    "nameMin": "Name must be at least 2 characters long",
+    "nameMax": "Name must be no more than 50 characters long",
+    "emailInvalid": "Invalid email address",
+    "phoneInvalid": "Invalid phone number",
+    "addressMin": "Address must be at least 5 characters long",
+    "addressMax": "Address must be no more than 500 characters long",
+    "occupationMin": "Occupation must be at least 2 characters long",
+    "occupationMax": "Occupation must be no more than 500 characters long",
+    "emergencyNameMin": "Emergency contact name must be at least 2 characters long",
+    "emergencyNameMax": "Emergency contact name must be no more than 50 characters long",
+    "selectDoctor": "Please select at least one doctor",
+    "insuranceNameMin": "Insurance provider name must be at least 2 characters long",
+    "insuranceNameMax": "Insurance provider name must be no more than 50 characters long",
+    "policyNumberMin": "Policy number must be at least 2 characters long",
+    "policyNumberMax": "Policy number must be no more than 50 characters long",
+    "consentRequired": "You must provide consent to continue",
+    "reasonMin": "Reason must be at least 2 characters long",
+    "reasonMax": "Reason must be no more than 500 characters long",
+    "cancellationReasonMin": "Cancellation reason must be at least 2 characters long",
+    "cancellationReasonMax": "Cancellation reason must be no more than 500 characters long"
+  },
+  "SMS": {
+    "scheduled": "Hello, this is a message from CarePulse. Your appointment with Dr. {doctor} has been scheduled for {dateTime}.",
+    "cancelled": "Unfortunately, your appointment scheduled for {dateTime} has been cancelled for the following reason: {reason}"
+  },
+  
+  "PatientForm": {
+    "greeting": "Welcome",
+    "subtitle": "Please enter your information to get started.",
+    "nameLabel": "Full Name",
+    "namePlaceholder": "Enter your full name",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Enter your email address",
+    "phoneLabel": "Phone Number",
+    "phonePlaceholder": "Enter your phone number",
+    "submit": "Get Started",
+    "errorCreatingAccount": "An error occurred while creating your account. Please try again."
+  }
 }

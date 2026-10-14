@@ -47,5 +47,19 @@
 "SMS": {
   "scheduled": "سلام، این پیام از کیرپالس است. نوبت شما برای {dateTime} با دکتر {doctor} ثبت شد.",
   "cancelled": "متأسفانه نوبت شما برای {dateTime} به دلیل زیر لغو شد: {reason}"
-}
+},
+
+  "PatientForm": {
+    "greeting": "خوش آمدید",
+    "subtitle": "برای شروع، لطفاً اطلاعات خود را وارد کنید.",
+    "nameLabel": "نام و نام خانوادگی",
+    "namePlaceholder": "نام کامل خود را وارد کنید",
+    "emailLabel": "ایمیل",
+    "emailPlaceholder": "آدرس ایمیل خود را وارد کنید",
+    "phoneLabel": "شماره تلفن",
+    "phonePlaceholder": "شماره تلفن خود را وارد کنید",
+    "submit": "شروع کنید",
+    "errorCreatingAccount": "خطایی در ایجاد حساب کاربری رخ داد. لطفاً دوباره تلاش کنید."
+  }
+
 }

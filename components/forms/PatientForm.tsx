@@ -33,24 +33,25 @@ export const PatientForm = () => {
       phone: '',
     },
   });
+const onSubmit = async (values: z.infer<typeof UserFormValidation>) => {
+  setIsLoading(true);
 
-  const onSubmit = async (values: z.infer<typeof UserFormValidation>) => {
-    setIsLoading(true);
+  try {
+    const newUser = await createUser(values);
 
-    try {
-      const newUser = await createUser(values);
-
-      if (newUser) {
-        router.push(`/patients/${newUser.$id}/register`);
-      }
-    } catch (error) {
-      console.error(error);
+    if (!newUser?.$id) {
       toast.error(t('errorCreatingAccount'));
-    } finally {
-      setIsLoading(false);
+      return;
     }
-  };
 
+    router.push(`/patients/${newUser.$id}/register`);
+  } catch (error) {
+    console.error('Error creating patient:', error);
+    toast.error(t('errorCreatingAccount'));
+  } finally {
+    setIsLoading(false);
+  }
+};
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 space-y-6">
       <section className="mb-12 space-y-4">
